@@ -1,4 +1,4 @@
 1) pip install -r requirements.txt
-2) bottle johncena.py
+2) python johncena.py
 3) ???
 4) PROFIT
