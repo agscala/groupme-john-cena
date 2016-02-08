@@ -226,6 +226,8 @@ def show_help(query, sender):
 # =============================================================================
 # Callback Functions
 # =============================================================================
+rl = RateLimit()
+
 @post('/')
 def bot(params=None):
     """John Cena!
@@ -307,6 +309,7 @@ SEARCHES = {
 # Entry Code
 # =============================================================================
 if __name__ == "__main__":
-    rl = RateLimit()
     send_message("http://media3.giphy.com/media/xTiTnoHt2NwerFMsCI/200.gif")
     run(host='0.0.0.0', port=80)
+
+app = default_app()
