@@ -32,7 +32,7 @@ IMG_CX = "006198087467552022390:yzva27gjh_u"
 # python ----------------------------------------------------------------------
 # untappd ---------------------------------------------------------------------
 # wolfram ---------------------------------------------------------------------
-WOLF_KEY = "6899TW-UTJ9EH2X2R"
+WOLF_KEY = "XP4YEL-GK2LW8JTV7"
 # wiki ------------------------------------------------------------------------
 # youtube ---------------------------------------------------------------------
 YT_KEY = "AIzaSyBIbGpoq6PBDRjdIbTojjEiztZerVooOjg"
@@ -90,8 +90,7 @@ def send_message(text, image=None):
     data = {"bot_id": "63747737acc3dbf60d7df729fd", "text": text}
     if image:
         data["attachments"] = [{"type": "image", "url": image}]
-    print(data)
-    #requests.post("https://api.groupme.com/v3/bots/post", data=data)
+    requests.post("https://api.groupme.com/v3/bots/post", data=data)
 
 
 # =============================================================================
@@ -231,7 +230,7 @@ def bot(params=None):
         msg = searches[s_type](query, params["sender_id"])
         send_message(msg)
     except (KeyError, NameError) as e:
-        print("Invalid entry, no output to give")
+        pass  # Ignore invalid keys to the lookup dict
     except Exception as e:
         send_message("WTF: {}".format(str(e)))
 
@@ -247,11 +246,4 @@ def home():
 if __name__ == "__main__":
     rl = RateLimit()
     send_message("http://media3.giphy.com/media/xTiTnoHt2NwerFMsCI/200.gif")
-    #run(host='0.0.0.0', port=80)
-    while True:
-        q = raw_input(">> ")
-        params = {
-            "text": q,
-            "sender_id": 1,
-        }
-        bot(params)
+    run(host='0.0.0.0', port=80)
