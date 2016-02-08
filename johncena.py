@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 
+"""John Cena!
+
+Supports:
+{}
+"""
+
 # ============================================================================
 # Imports
 # ============================================================================
@@ -29,6 +35,9 @@ GIF_SEARCH = "http://api.giphy.com/v1/gifs/search?q={}&api_key={}"
 # image -----------------------------------------------------------------------
 IMG_KEY = "AIzaSyDQF9Ukvb2nIL66SCoq76Ru4tXZoTL5rY8"
 IMG_CX = "006198087467552022390:yzva27gjh_u"
+# maps ------------------------------------------------------------------------
+MAPS_URL = "https://maps.googleapis.com/maps/api/place/textsearch/json"
+MAPS_KEY = "AIzaSyDQF9Ukvb2nIL66SCoq76Ru4tXZoTL5rY8"
 # python ----------------------------------------------------------------------
 # untappd ---------------------------------------------------------------------
 # wolfram ---------------------------------------------------------------------
@@ -52,7 +61,7 @@ class RateLimit(object):
         self.last_sent[sender] = datetime.datetime.now()
 
     def can_send(self, sender):
-	return True
+        return True
         if (datetime.datetime.now() - self.last_sent[sender]).seconds > self.LIMIT_MINS * 60:
             return True
         else:
@@ -77,9 +86,9 @@ def untappd(search):
 
     for beer in beers:
         beer = beer["beer"]
-	if beer["is_in_production"] == 1:
-		description = beer["beer_name"] + " (" + beer["beer_style"] + ", " + str(beer["beer_abv"]) + "% ABV)\n"
-		result = result + description
+        if beer["is_in_production"] == 1:
+            description = beer["beer_name"] + " (" + beer["beer_style"] + ", " + str(beer["beer_abv"]) + "% ABV)\n"
+            result = result + description
 
     return result
 
@@ -99,7 +108,7 @@ def send_message(text, image=None):
 def search_gif(query, sender):
     """Search Giphy and return link for search"""
     if not rl.can_send(sender):
-        msg = "You can request another image in " + rl.time_remaining(params["sender_id"]) + " minutes."
+        msg = "You can request another image in " + rl.time_remaining(sender) + " minutes."
         return msg
 
     try:
@@ -119,7 +128,7 @@ def search_img(query, sender):
     if not rl.can_send(sender):
         msg = "You can request another image in " + rl.time_remaining(sender) + " minutes."
         return msg
-        
+
     try:
         rl.mark_sending(sender)
         service = build("customsearch", "v1", developerKey=IMG_KEY)
@@ -131,6 +140,26 @@ def search_img(query, sender):
     except Exception as e:
         msg = "Couldn't find an image"
     return msg
+
+
+def search_lunch(query, sender):
+    url = ("{}?query={}&key={}").format(MAPS_URL, query, MAPS_KEY)
+    r = requests.get(url, verify=False)
+    res = r.json()["results"]
+    msg = ""
+    if res:
+        msg = "Suggestions for {}\n\n".format(query)
+        for idx, place in enumerate(res[:5]):
+            data = []
+            for key in ["name", "rating", "formatted_address"]:
+                try:
+                    data.append(place[key])
+                except KeyError:
+                    data.append("None")
+            msg += ("{}. {}\n"
+                     "     {} stars\n"
+                     "     {}\n\n").format(idx+1, data[0], data[1], data[2])
+    return msg.strip()
 
 
 def python_eval(query, sender):
@@ -187,16 +216,25 @@ def search_yt(query, sender):
     return msg
 
 
+def show_help(query, sender):
+    fns = sorted(SEARCHES.keys())
+    l = max(map(len, fns)) + 4
+    fnhelp = "\n".join(["  {:<{}}{}".format(f, l, SEARCHES[f]["help"]) for f in fns])
+    return __doc__.format(fnhelp)
+
+
 # =============================================================================
 # Callback Functions
 # =============================================================================
 @post('/')
 def bot(params=None):
-    """Callback function for John Cena stuff.
+    """John Cena!
 
     Supports:
+      /help     Show this help message
       /gif      Search Giphy for gifs and return first link if found
       /img      Search Google images & return first link if found
+      /lunch    Search Google maps for lunch spots!
       /py       Perform python function / command & return stdout
       /query    Search Wolfram Alpha and return summary
       /wiki     Search for wiki page & return summary
@@ -216,18 +254,9 @@ def bot(params=None):
         s_type, query = text_in[0].lower(), " ".join(text_in[1:])
     except IndexError as e:
         return  # Not enough inputs to perform a search
-    
-    searches = {
-        "/gif": search_gif,
-        "/img": search_img,
-        "/py": python_eval,
-        "/query": search_wolfram,
-        "/wiki": search_wiki,
-        "/yt": search_yt,
-    }
 
     try:
-        msg = searches[s_type](query, params["sender_id"])
+        msg = SEARCHES[s_type]["fn"](query, params["sender_id"])
         send_message(msg)
     except (KeyError, NameError) as e:
         pass  # Ignore invalid keys to the lookup dict
@@ -240,6 +269,40 @@ def home():
     return "Hi"
 
 
+SEARCHES = {
+    "/help": {
+        "fn": show_help,
+        "help": "Show this help message",
+    },
+    "/gif": {
+        "fn": search_gif,
+        "help": "Search Giphy for gifs and return first link if found",
+    },
+    "/img": {
+        "fn": search_img,
+        "help": "Search Google images & return first link if found",
+    },
+    "/lunch": {
+        "fn": search_lunch,
+        "help": "Find some lunch cuisines",
+    },
+    "/py": {
+        "fn": python_eval,
+        "help": "Perform python function / command & return stdout",
+    },
+    "/query": {
+        "fn": search_wolfram,
+        "help": "Search Wolfram Alpha and return summary",
+    },
+    "/wiki": {
+        "fn": search_wiki,
+        "help": "Search for wiki page & return summary",
+    },
+    "/yt": {
+        "fn": search_yt,
+        "help": "Search for youtube video & return link",
+    },
+}
 # =============================================================================
 # Entry Code
 # =============================================================================
