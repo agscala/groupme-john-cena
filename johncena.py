@@ -17,16 +17,31 @@ import time
 import wikipedia
 import datetime
 import wolframalpha
+from googleapiclient.discovery import build
 
 
-# ============================================================================
+# =============================================================================
 # Global variables & constants
-# ============================================================================
+# =============================================================================
+# gif -------------------------------------------------------------------------
+GIF_KEY = "dc6zaTOxFJmzC"
+GIF_SEARCH = "http://api.giphy.com/v1/gifs/search?q={}&api_key={}"
+# image -----------------------------------------------------------------------
+IMG_KEY = "AIzaSyDQF9Ukvb2nIL66SCoq76Ru4tXZoTL5rY8"
+IMG_CX = "006198087467552022390:yzva27gjh_u"
+# python ----------------------------------------------------------------------
+# untappd ---------------------------------------------------------------------
+# wolfram ---------------------------------------------------------------------
+WOLF_KEY = "6899TW-UTJ9EH2X2R"
+# wiki ------------------------------------------------------------------------
+# youtube ---------------------------------------------------------------------
+YT_KEY = "AIzaSyBIbGpoq6PBDRjdIbTojjEiztZerVooOjg"
+YT_REQ = "https://www.googleapis.com/youtube/v3/search?part=snippet&q={}&key={}"
 
 
-# ============================================================================
+# =============================================================================
 # Classes
-# ============================================================================
+# =============================================================================
 class RateLimit(object):
     """Class to (presumably) limit how often a user can call John Cena functions"""
     def __init__(self):
@@ -79,9 +94,9 @@ def send_message(text, image=None):
     #requests.post("https://api.groupme.com/v3/bots/post", data=data)
 
 
-# ============================================================================
+# =============================================================================
 # Search Functions
-# ============================================================================
+# =============================================================================
 def search_gif(query, sender):
     """Search Giphy and return link for search"""
     if not rl.can_send(sender):
@@ -92,11 +107,11 @@ def search_gif(query, sender):
         rl.mark_sending(sender)
         time.sleep(0.05)
         query = query.replace(" ", "+")
-        res = requests.get("http://api.giphy.com/v1/gifs/search?q="+query+"&api_key=dc6zaTOxFJmzC")
+        res = requests.get(GIF_SEARCH.format(query, GIF_KEY))
         msg = res.json()["data"][0]["images"]["fixed_height"]["url"]
     except Exception as e:
         send_message("Couldn't find a gif, here's a google image instead.")
-        msg = search_img(query)
+        msg = search_img(query, sender)
     return msg
 
 
@@ -108,18 +123,18 @@ def search_img(query, sender):
         
     try:
         rl.mark_sending(sender)
-        BASE_URL = ("https://ajax.googleapis.com/ajax/services/search/images?"
-                    "v=1.0&q={}&start={}").format(query)
-        start = 0 # Google's start query string parameter for pagination.
-        r = requests.get(BASE_URL.format(start))
-        image_info = json.loads(r.text)['responseData']['results'][0]
-        msg = image_info['unescapedUrl']
-    except Exception:
+        service = build("customsearch", "v1", developerKey=IMG_KEY)
+        searcher = service.cse().list(q=query, searchType="image", cx=IMG_CX,
+                                      safe="off")
+        res = searcher.execute()
+        pprint(res)
+        msg = res["items"][0]["link"]
+    except Exception as e:
         msg = "Couldn't find an image"
     return msg
 
 
-def python_eval(query):
+def python_eval(query, sender):
     """Call a local python command/function and return stdout"""
     try:
         time.sleep(0.05)
@@ -133,10 +148,10 @@ def python_eval(query):
     return msg
 
 
-def search_wolfram(query):
+def search_wolfram(query, sender):
     """Search wolfram alpha for info"""
     try:
-        client = wolframalpha.Client('XP4YEL-GK2LW8JTV7')
+        client = wolframalpha.Client(WOLF_KEY)
         res = client.query(query)
         msg = "\n".join([pod.text for pod in res.pods[:2]])
     except Exception, e:
@@ -144,34 +159,40 @@ def search_wolfram(query):
     return msg
 
 
-def search_wiki(query):
+def search_wiki(query, sender):
     """Search wikipedia for subject page"""
-    msg = "Wikipedia: Nothing found!"
     try:
         page = wikipedia.page(query)
         msg = page.summary.split("\n")[0][:900]
     except Exception as e:
-        msg = "Couldn't find a match on wikipedia. Could it be one of these?\n" + "\n".join(wikipedia.search(search)[:5])
+        other_pages = "\n".join(wikipedia.search(search)[:5])
+        msg = ("Couldn't find a match on wikipedia. "
+                "Could it be one of these?\n{}".format(other_pages))
     return msg
 
 
-def search_yt(query):
+def search_yt(query, sender):
     """Perform youtube video search"""
     try:
         formatted_query = query.replace(" ", "+")
-        x = requests.get("https://www.googleapis.com/youtube/v3/search?part=snippet&q="+formatted_query+"&key=AIzaSyBIbGpoq6PBDRjdIbTojjEiztZerVooOjg")
-        videoid = x.json()["items"][0]['id']['videoId']
+        x = requests.get(YT_REQ.format(formatted_query, YT_KEY))
+        # Loop through all items and find first video. Skip all channels.
+        for item in x.json()["items"]:
+            yt_id = item["id"]
+            if yt_id["kind"].lower() in ("youtube#video", ):
+                videoid = yt_id["videoId"]
+                break
         msg = "https://www.youtube.com/watch?v=" + videoid
     except Exception as e:
         msg = "Couldn't find a video on youtube"
     return msg
 
 
-# ============================================================================
+# =============================================================================
 # Callback Functions
-# ============================================================================
+# =============================================================================
 @post('/')
-def bot():
+def bot(params=None):
     """Callback function for John Cena stuff.
 
     Supports:
@@ -189,9 +210,13 @@ def bot():
 #	except Exception:
 #	    pass
 #
-    params = json.loads(request.params.keys()[0])
+    if params is None:
+        params = json.loads(request.params.keys()[0])
     text_in = params["text"].split()
-    s_type, query = text_in[0].lower(), text_in[1:]
+    try:
+        s_type, query = text_in[0].lower(), " ".join(text_in[1:])
+    except IndexError as e:
+        return  # Not enough inputs to perform a search
     
     searches = {
         "/gif": search_gif,
@@ -216,10 +241,17 @@ def home():
     return "Hi"
 
 
-# ============================================================================
+# =============================================================================
 # Entry Code
-# ============================================================================
+# =============================================================================
 if __name__ == "__main__":
     rl = RateLimit()
     send_message("http://media3.giphy.com/media/xTiTnoHt2NwerFMsCI/200.gif")
-    run(host='0.0.0.0', port=80)
+    #run(host='0.0.0.0', port=80)
+    while True:
+        q = raw_input(">> ")
+        params = {
+            "text": q,
+            "sender_id": 1,
+        }
+        bot(params)
