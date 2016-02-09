@@ -48,6 +48,10 @@ WOLF_KEY = "XP4YEL-GK2LW8JTV7"
 YT_KEY = "AIzaSyBIbGpoq6PBDRjdIbTojjEiztZerVooOjg"
 YT_REQ = "https://www.googleapis.com/youtube/v3/search?part=snippet&q={}&key={}"
 
+JOHN_CENA_ACTIVATE = "http://media3.giphy.com/media/xTiTnoHt2NwerFMsCI/200.gif"
+JOHN_CENA_SAD = "http://static.giantbomb.com/uploads/screen_kubrick/9/93998/2651842-untitled.jpg"
+JOHN_CENA_WTF = "https://whatistheexcel.com/wooobooru/_images/91fa21f02ccbe8980eae483263197965/812%20-%20john_cena%20macro%20wtf_am_i_looking_at%20wwe.png"
+
 
 # =============================================================================
 # Classes
@@ -144,6 +148,7 @@ def search_img(query, sender):
         data["attachments"] = [{"type": "image", "url": url}]
     except Exception:
         data["text"] = "Couldn't find an image"
+        data["attachments"] = [{"type": "image", "url": JOHN_CENA_SAD}]
     return data
 
 
@@ -323,6 +328,7 @@ def bot(params=None):
         pass  # Ignore invalid keys to the lookup dict
     except Exception as e:
         data = {"text": "WTF: {}".format(str(e))}
+        data["attachments"] = [{"type": "image", "url": JOHN_CENA_WTF}]
         send_message(data)
 
 
@@ -373,7 +379,7 @@ SEARCHES = {
 # Entry Code
 # =============================================================================
 if __name__ == "__main__":
-    startup = {"text": "http://media3.giphy.com/media/xTiTnoHt2NwerFMsCI/200.gif"}
+    startup = {"text": "John Cena ACTIVATE!", "attachments": [{"type": "image", "url": JOHN_CENA_ACTIVATE}]}
     send_message(startup)
     run(host='0.0.0.0', port=80)
 
