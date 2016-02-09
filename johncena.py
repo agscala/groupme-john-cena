@@ -287,7 +287,7 @@ def show_help(query, sender):
     return __doc__.format(fnhelp)
 
 def redeploy(query, sender):
-    subprocess.call("git pull origin master && supervisorctl restart johncena")
+    subprocess.call("git pull origin master && supervisorctl restart johncena", shell=True)
 
 
 # =============================================================================
