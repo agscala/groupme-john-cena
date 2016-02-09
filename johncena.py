@@ -15,6 +15,7 @@ from pprint import pprint
 from requests.exceptions import ConnectionError
 from collections import defaultdict
 import json
+import random
 import re
 import os
 import requests
@@ -93,12 +94,12 @@ def untappd(search):
     return result
 
 
-def send_message(text, image=None):
+def send_message(data=None):
     """Send a John Cena message to GroupMe"""
     time.sleep(0.05)
-    data = {"bot_id": "63747737acc3dbf60d7df729fd", "text": text}
-    if image:
-        data["attachments"] = [{"type": "image", "url": image}]
+    if data is None:
+        data = dict()
+    data["bot_id"] = "63747737acc3dbf60d7df729fd"
     requests.post("https://api.groupme.com/v3/bots/post", data=data)
 
 
@@ -107,27 +108,31 @@ def send_message(text, image=None):
 # =============================================================================
 def search_gif(query, sender):
     """Search Giphy and return link for search"""
+    data = dict()
     if not rl.can_send(sender):
-        msg = "You can request another image in " + rl.time_remaining(sender) + " minutes."
-        return msg
+        data["text"] = "You can request another image in {} minutes.".format(rl.time_remaining(sender))
+        return data
 
     try:
         rl.mark_sending(sender)
         time.sleep(0.05)
         query = query.replace(" ", "+")
         res = requests.get(GIF_SEARCH.format(query, GIF_KEY))
-        msg = res.json()["data"][0]["images"]["fixed_height"]["url"]
-    except Exception as e:
-        send_message("Couldn't find a gif, here's a google image instead.")
-        msg = search_img(query, sender)
-    return msg
+        url = res.json()["data"][0]["images"]["fixed_height"]["url"]
+        data["attachments"] = [{"type": "image", "url": url}]
+    except Exception:
+        data["text"] = "Couldn't find a gif, here's a google image instead."
+        send_message(data)
+        data = search_img(query, sender)
+    return data
 
 
 def search_img(query, sender):
     """Search for Google images and return"""
+    data = dict()
     if not rl.can_send(sender):
-        msg = "You can request another image in " + rl.time_remaining(sender) + " minutes."
-        return msg
+        data["text"] = "You can request another image in {} minutes.".format(rl.time_remaining(sender))
+        return data
 
     try:
         rl.mark_sending(sender)
@@ -135,72 +140,124 @@ def search_img(query, sender):
         searcher = service.cse().list(q=query, searchType="image", cx=IMG_CX,
                                       safe="off")
         res = searcher.execute()
-        pprint(res)
-        msg = res["items"][0]["link"]
-    except Exception as e:
-        msg = "Couldn't find an image"
-    return msg
+        url = res["items"][0]["link"]
+        data["attachments"] = [{"type": "image", "url": url}]
+    except Exception:
+        data["text"] = "Couldn't find an image"
+    return data
+
+
+def maps_search(query, req_url, keys=None, max_res=5, rand=False, attach=False):
+    # Basic setup -------------------------------------------------------------
+    data = dict()
+    print_keys = {
+        "name": "Name",
+        "rating": "Rating",
+        "formatted_address": "Address",
+    }
+    if keys is None:
+        keys = ["name", "rating", "formatted_address"]
+
+    # Perform the Maps request ------------------------------------------------
+    try:
+        r = requests.get(req_url, verify=False)
+        res = r.json()["results"]
+    except Exception:
+        data["text"] = "Failed to get Maps info"
+        return data
+
+    # Filter all the data -----------------------------------------------------
+    msg = ""
+    if res:
+        # Set up basic data to return -----------------------------------------
+        loc = {"type": "location", "lng": None, "lat": None, "name": None}
+        msg = "Suggestions for {}\n\n".format(query)
+        l = max(map(len, print_keys.values()))
+        data["attachments"] = []
+
+        # Perform data selection ----------------------------------------------
+        if rand:
+            places = [random.choice(res)]
+        else:
+            places = res[:max_res]
+
+        # Create text string and location attachments -------------------------
+        for idx, place in enumerate(places):
+            loc_data = place["geometry"]["location"]
+            loc["lng"] = loc_data["lng"]
+            loc["lat"] = loc_data["lat"]
+            loc["name"] = place["name"]
+            if attach:
+                data["attachments"].append(loc)
+            for key in keys:
+                try:
+                    print_key = print_keys[key]
+                    msg += "{:<{}}: {}\n".format(print_key, l, place[key])
+                except KeyError:
+                    msg += "{:<{}}: {}\n".format(print_key, l, None)
+            msg += "\n"
+    data["text"] = msg.strip()
+    return data
 
 
 def search_lunch(query, sender):
+    query = query + " lunch"
+    url = ("{}?query={}&key={}&types=restaurant").format(MAPS_URL, query,
+                                                         MAPS_KEY)
+    data = maps_search(query, url, None, 5, True, True)
+    return data
+
+
+def search_maps(query, sender):
+    keys = ["name", "formatted_address"]
     url = ("{}?query={}&key={}").format(MAPS_URL, query, MAPS_KEY)
-    r = requests.get(url, verify=False)
-    res = r.json()["results"]
-    msg = ""
-    if res:
-        msg = "Suggestions for {}\n\n".format(query)
-        for idx, place in enumerate(res[:5]):
-            data = []
-            for key in ["name", "rating", "formatted_address"]:
-                try:
-                    data.append(place[key])
-                except KeyError:
-                    data.append("None")
-            msg += ("{}. {}\n"
-                     "     {} stars\n"
-                     "     {}\n\n").format(idx+1, data[0], data[1], data[2])
-    return msg.strip()
+    data = maps_search(query, url, keys, 5, False, False)
+    return data
 
 
 def python_eval(query, sender):
     """Call a local python command/function and return stdout"""
+    data = dict()
+    cmd = "python -c \"{}\"".format(query)
+    time.sleep(0.05)
     try:
-        time.sleep(0.05)
-        cmd = "python -c \"{}\"".format(query)
-        proc = subprocess.Popen(cmd, stdin=None, stdout=subprocess.PIPE, shell=True)
+        proc = subprocess.Popen(cmd, stdin=None, stdout=subprocess.PIPE,
+                                shell=True)
         stdout = proc.communicate()[0]
-        msg = str(stdout)
-        msg = ">>> {}".format(msg[:995])
-    except Exception, e:
-        msg = "Error: {}".format(e)
-    return msg
+        data["text"] = ">>> {}".format(str(stdout)[:995])
+    except Exception as e:
+        data["text"] = "Error: {}".format(str(e))
+    return data
 
 
 def search_wolfram(query, sender):
     """Search wolfram alpha for info"""
+    data = dict()
     try:
         client = wolframalpha.Client(WOLF_KEY)
         res = client.query(query)
-        msg = "\n".join([pod.text for pod in res.pods[:2]])
-    except Exception, e:
-        msg = "Error processing WolframAlpha search"
-    return msg
+        data["text"] = "\n".join([pod.text for pod in res.pods[:2]])
+    except Exception:
+        data["text"] = "Error processing WolframAlpha search"
+    return data
 
 
 def search_wiki(query, sender):
     """Search wikipedia for subject page"""
+    data = dict()
     try:
         page = wikipedia.page(query)
-        msg = page.summary.split("\n")[0][:900]
-    except Exception as e:
-        other_pages = "\n".join(wikipedia.search(search)[:5])
-        msg = ("Couldn't find a match on wikipedia. "
-                "Could it be one of these?\n{}".format(other_pages))
-    return msg
+        data["text"] = page.summary.split("\n")[0][:900]
+    except Exception:
+        other_pages = "\n".join(wikipedia.search(query)[:5])
+        data["text"] = ("Couldn't find a match on wikipedia. "
+                        "Could it be one of these?\n{}".format(other_pages))
+    return data
 
 
 def search_yt(query, sender):
     """Perform youtube video search"""
+    data = dict()
     try:
         formatted_query = query.replace(" ", "+")
         x = requests.get(YT_REQ.format(formatted_query, YT_KEY))
@@ -210,16 +267,17 @@ def search_yt(query, sender):
             if yt_id["kind"].lower() in ("youtube#video", ):
                 videoid = yt_id["videoId"]
                 break
-        msg = "https://www.youtube.com/watch?v=" + videoid
-    except Exception as e:
-        msg = "Couldn't find a video on youtube"
-    return msg
+        data["text"] = "https://www.youtube.com/watch?v=" + videoid
+    except Exception:
+        data["text"] = "Couldn't find a video on youtube"
+    return data
 
 
 def show_help(query, sender):
     fns = sorted(SEARCHES.keys())
     l = max(map(len, fns)) + 4
-    fnhelp = "\n".join(["  {:<{}}{}".format(f, l, SEARCHES[f]["help"]) for f in fns])
+    fnhelp = "\n".join(["  {:<{}}{}".format(f, l, SEARCHES[f]["help"])
+                        for f in fns])
     return __doc__.format(fnhelp)
 
 
@@ -235,6 +293,7 @@ def bot(params=None):
       /gif      Search Giphy for gifs and return first link if found
       /img      Search Google images & return first link if found
       /lunch    Search Google maps for lunch spots!
+      /map      Search Google maps for top 5 stuff
       /py       Perform python function / command & return stdout
       /query    Search Wolfram Alpha and return summary
       /wiki     Search for wiki page & return summary
@@ -256,12 +315,13 @@ def bot(params=None):
         return  # Not enough inputs to perform a search
 
     try:
-        msg = SEARCHES[s_type]["fn"](query, params["sender_id"])
-        send_message(msg)
+        data = SEARCHES[s_type]["fn"](query, params["sender_id"])
+        send_message(data)
     except (KeyError, NameError) as e:
         pass  # Ignore invalid keys to the lookup dict
     except Exception as e:
-        send_message("WTF: {}".format(str(e)))
+        data = {"text": "WTF: {}".format(str(e))}
+        send_message(data)
 
 
 @route('/')
@@ -284,7 +344,11 @@ SEARCHES = {
     },
     "/lunch": {
         "fn": search_lunch,
-        "help": "Find some lunch cuisines",
+        "help": "Find some lunch cuisines (/lunch [loc | query])",
+    },
+    "/map": {
+        "fn": search_maps,
+        "help": "Search Google maps for top 5 locations related to query",
     },
     "/py": {
         "fn": python_eval,
@@ -308,5 +372,6 @@ SEARCHES = {
 # =============================================================================
 if __name__ == "__main__":
     rl = RateLimit()
-    send_message("http://media3.giphy.com/media/xTiTnoHt2NwerFMsCI/200.gif")
+    startup = {"text": "http://media3.giphy.com/media/xTiTnoHt2NwerFMsCI/200.gif"}
+    send_message(startup)
     run(host='0.0.0.0', port=80)
