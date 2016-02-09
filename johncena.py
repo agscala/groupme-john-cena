@@ -24,6 +24,7 @@ import time
 import wikipedia
 import datetime
 import wolframalpha
+import subprocess
 from googleapiclient.discovery import build
 
 
@@ -285,6 +286,9 @@ def show_help(query, sender):
                         for f in fns])
     return __doc__.format(fnhelp)
 
+def redeploy():
+    subprocess.call("git pull origin master && supervisorctl restart johncena")
+
 
 # =============================================================================
 # Callback Functions
@@ -305,6 +309,7 @@ def bot(params=None):
       /query    Search Wolfram Alpha and return summary
       /wiki     Search for wiki page & return summary
       /yt       Search for youtube video & return link
+      /redeploy Redeploy John Cena
     """
 #    ticker_res = re.search('\$([A-Z]{1,4})', params['text'])
 #    if ticker_res:
@@ -373,6 +378,10 @@ SEARCHES = {
     "/yt": {
         "fn": search_yt,
         "help": "Search for youtube video & return link",
+    },
+    "/redeploy": {
+        "fn": redeploy,
+        "help": "Redeploy John Cena",
     },
 }
 # =============================================================================
