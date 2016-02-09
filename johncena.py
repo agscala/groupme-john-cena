@@ -381,7 +381,7 @@ SEARCHES = {
     },
     "/redeploy": {
         "fn": redeploy,
-        "help": "Redeploy John Cena",
+        "help": "Redeploy John Cena (dev purposes only)",
     },
 }
 # =============================================================================
