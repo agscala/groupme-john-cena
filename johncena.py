@@ -161,13 +161,18 @@ def search_gif(query, sender):
         search_img(query, sender)
 
 
+def get_google_images_items(query):
+    service = build("customsearch", "v1", developerKey=IMG_KEY)
+    searcher = service.cse().list(q=query, searchType="image", cx=IMG_CX, safe="off")
+    res = searcher.execute()
+    return res["items"]
+
+
 def search_img(query, sender):
     """Search for Google images and return"""
     try:
-        service = build("customsearch", "v1", developerKey=IMG_KEY)
-        searcher = service.cse().list(q=query, searchType="image", cx=IMG_CX, safe="off")
-        res = searcher.execute()
-        url = res["items"][0]["link"]
+        items = get_google_images_items(query)
+        url = items[0]["link"]
         CENA.set_text(url)
     except Exception:
         CENA.set_text("Couldn't find an image")
@@ -285,6 +290,17 @@ def search_yt(query, sender):
         CENA.set_text("Couldn't find a video on youtube")
 
 
+def shaq(query, sender):
+    try:
+        q = "shaq gold bond quotes"
+        items = get_google_images_items(q)
+        item = random.choice(items)
+        url = item["link"]
+        CENA.set_text(url)
+    except Exception:
+        CENA.set_text("Couldn't find an image")
+
+
 def show_help(query, sender):
     fns = sorted(SEARCHES.keys())
     l = max(map(len, fns)) + 4
@@ -380,6 +396,10 @@ SEARCHES = {
         "fn": search_wolfram,
         "help": "Search Wolfram Alpha and return summary",
     },
+    "/shaq": {
+        "fn": shaq,
+        "help": "Get a Shaq goldbond quote",
+    },
     "/wiki": {
         "fn": search_wiki,
         "help": "Search for wiki page & return summary",
@@ -401,6 +421,9 @@ CENA = GroupmeMessage()
 # Entry Code
 # =============================================================================
 if __name__ == "__main__":
+    CENA.set_text("AND HIS NAME IS")
+    CENA.send_message()
+    time.sleep(1)
     CENA.set_text(JOHN_CENA_ACTIVATE)
     CENA.send_message()
     run(host='0.0.0.0', port=80)
