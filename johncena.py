@@ -153,6 +153,12 @@ def get_google_images_items(query):
     return res["items"]
 
 
+def get_google_gifs(query):
+    q = "{} imagetype:animated".format(query)
+    items = get_google_images_items(q)
+    return items
+
+
 def search_gif(query, sender):
     """Search Giphy and return link for search"""
     try:
@@ -163,9 +169,23 @@ def search_gif(query, sender):
         # res = requests.get(GIF_SEARCH.format(query, GIF_KEY))
         # url = res.json()["data"][0]["images"]["fixed_height"]["url"]
         # CENA.set_text(url)
-        q = "{} filetype:gif".format(query)
-        items = get_google_images_items(q)
+        items = get_google_gifs(query)
         url = items[0]["link"]
+        CENA.set_text(url)
+    except Exception:
+        CENA.set_text("Couldn't find a gif, here's a google image instead.")
+        CENA.send_message()
+        search_img(query, sender)
+
+
+def search_randgif(query, sender):
+    """Search google images and return link for search"""
+    try:
+        rl.mark_sending(sender)
+        time.sleep(0.05)
+        items = get_google_gifs(query)
+        item = random.choice(items)
+        url = item["link"]
         CENA.set_text(url)
     except Exception:
         CENA.set_text("Couldn't find a gif, here's a google image instead.")
@@ -400,6 +420,10 @@ SEARCHES = {
     "/query": {
         "fn": search_wolfram,
         "help": "Search Wolfram Alpha and return summary",
+    },
+    "/randgif": {
+        "fn": search_randgif,
+        "help": "Get a random google images gif",
     },
     "/shaq": {
         "fn": shaq,
