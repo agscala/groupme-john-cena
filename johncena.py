@@ -146,26 +146,31 @@ def untappd(search):
 # =============================================================================
 # Search Functions
 # =============================================================================
-def search_gif(query, sender):
-    """Search Giphy and return link for search"""
-    try:
-        rl.mark_sending(sender)
-        time.sleep(0.05)
-        query = query.replace(" ", "+")
-        res = requests.get(GIF_SEARCH.format(query, GIF_KEY))
-        url = res.json()["data"][0]["images"]["fixed_height"]["url"]
-        CENA.set_text(url)
-    except Exception:
-        CENA.set_text("Couldn't find a gif, here's a google image instead.")
-        CENA.send_message()
-        search_img(query, sender)
-
-
 def get_google_images_items(query):
     service = build("customsearch", "v1", developerKey=IMG_KEY)
     searcher = service.cse().list(q=query, searchType="image", cx=IMG_CX, safe="off")
     res = searcher.execute()
     return res["items"]
+
+
+def search_gif(query, sender):
+    """Search Giphy and return link for search"""
+    try:
+        rl.mark_sending(sender)
+        time.sleep(0.05)
+        # GIPHY Search ------
+        # query = query.replace(" ", "+")
+        # res = requests.get(GIF_SEARCH.format(query, GIF_KEY))
+        # url = res.json()["data"][0]["images"]["fixed_height"]["url"]
+        # CENA.set_text(url)
+        q = "{} filetype:gif".format(query)
+        items = get_google_images_items(q)
+        url = items[0]["link"]
+        CENA.set_text(url)
+    except Exception:
+        CENA.set_text("Couldn't find a gif, here's a google image instead.")
+        CENA.send_message()
+        search_img(query, sender)
 
 
 def search_img(query, sender):
