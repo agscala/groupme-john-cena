@@ -146,17 +146,14 @@ def untappd(search):
 # =============================================================================
 # Search Functions
 # =============================================================================
-def get_google_images_items(query):
+def get_google_images_items(query, gif=False):
     service = build("customsearch", "v1", developerKey=IMG_KEY)
-    searcher = service.cse().list(q=query, searchType="image", cx=IMG_CX, safe="off")
+    if gif:
+        searcher = service.cse().list(q=query, searchType="image", cx=IMG_CX, safe="off", fileType="gif")
+    else:
+        searcher = service.cse().list(q=query, searchType="image", cx=IMG_CX, safe="off")
     res = searcher.execute()
     return res["items"]
-
-
-def get_google_gifs(query):
-    q = "{} filetype:gif".format(query)
-    items = get_google_images_items(q)
-    return items
 
 
 def search_gif(query, sender):
@@ -169,7 +166,7 @@ def search_gif(query, sender):
         # res = requests.get(GIF_SEARCH.format(query, GIF_KEY))
         # url = res.json()["data"][0]["images"]["fixed_height"]["url"]
         # CENA.set_text(url)
-        items = get_google_gifs(query)
+        items = get_google_images_items(query, True)
         url = items[0]["link"]
         CENA.set_text(url)
     except Exception:
@@ -183,7 +180,7 @@ def search_randgif(query, sender):
     try:
         rl.mark_sending(sender)
         time.sleep(0.05)
-        items = get_google_gifs(query)
+        items = get_google_images_items(query, True)
         item = random.choice(items)
         url = item["link"]
         CENA.set_text(url)
@@ -196,7 +193,7 @@ def search_randgif(query, sender):
 def search_img(query, sender):
     """Search for Google images and return"""
     try:
-        items = get_google_images_items(query)
+        items = get_google_images_items(query, False)
         url = items[0]["link"]
         CENA.set_text(url)
     except Exception:
