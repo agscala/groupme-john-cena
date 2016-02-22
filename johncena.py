@@ -154,7 +154,7 @@ def get_google_images_items(query):
 
 
 def get_google_gifs(query):
-    q = "{} imagetype:animated".format(query)
+    q = "{} filetype:gif".format(query)
     items = get_google_images_items(q)
     return items
 
