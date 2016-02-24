@@ -162,6 +162,8 @@ def get_google_images_items(query, gif=False):
             }
             req = requests.get("https://www.googleapis.com/customsearch/v1",params=parameters)
             # url = req.json()["items"][0]["link"]
+            CENA.set_text(req.json()["items"][0]["link"])
+            CENA.send_message()
             return req.json()["items"]
         except Exception as e:
             CENA.set_text("aaron your code fucking sucks")
