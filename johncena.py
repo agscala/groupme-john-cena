@@ -169,8 +169,9 @@ def search_gif(query, sender):
         items = get_google_images_items(query, True)
         url = items[0]["link"]
         CENA.set_text(url)
-    except Exception:
-        CENA.set_text("Couldn't find a gif, here's a google image instead.")
+    except Exception as e:
+        CENA.set_text(str(e))
+        #tCENA.set_text("Couldn't find a gif, here's a google image instead.")
         CENA.send_message()
         search_img(query, sender)
 
