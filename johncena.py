@@ -153,10 +153,10 @@ def get_google_images_items(query, gif=False):
     else:
         searcher = service.cse().list(q=query, searchType="image", cx=IMG_CX, safe="off")
     res = searcher.execute()
-    
+
     CENA.set_text(res)
     CENA.send_message()
-    
+
     return res["items"]
 
 
