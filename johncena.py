@@ -152,13 +152,13 @@ def get_google_images_items(query, gif=False):
         try:
             # searcher = service.cse().list(q=query, searchType="image", cx=IMG_CX, safe="off", fileType="gif")
             parameters = {
-                q: query,
-                searchType: "image",
-                cx: IMG_CX,
-                safe: "off",
-                fileType: "gif",
-                hq: "animated",
-                tbs: "itp:animated"
+                "q": query,
+                "searchType": "image",
+                "cx": IMG_CX,
+                "safe": "off",
+                "fileType": "gif",
+                "hq": "animated",
+                "tbs": "itp:animated"
             }
             req = requests.get("https://www.googleapis.com/customsearch/v1",params=parameters)
             # url = req.json()["items"][0]["link"]
