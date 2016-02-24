@@ -164,6 +164,8 @@ def get_google_images_items(query, gif=False):
             # url = req.json()["items"][0]["link"]
             return req.json()["items"]
         except Exception as e:
+            CENA.set_text("aaron your code fucking sucks")
+            CENA.send_message()
             CENA.set_text(str(e))
             CENA.send_message()
     else:
