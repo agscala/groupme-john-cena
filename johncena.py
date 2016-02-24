@@ -149,7 +149,7 @@ def untappd(search):
 def get_google_images_items(query, gif=False):
     service = build("customsearch", "v1", developerKey=IMG_KEY)
     if gif:
-        searcher = service.cse().list(q=query, searchType="image", cx=IMG_CX, safe="off", fileType="gif", tbs="itp:animated")
+        searcher = service.cse().list(q=query, searchType="image", cx=IMG_CX, safe="off", fileType="gif")
     else:
         searcher = service.cse().list(q=query, searchType="image", cx=IMG_CX, safe="off")
     res = searcher.execute()
