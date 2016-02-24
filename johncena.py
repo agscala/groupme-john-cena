@@ -149,11 +149,27 @@ def untappd(search):
 def get_google_images_items(query, gif=False):
     service = build("customsearch", "v1", developerKey=IMG_KEY)
     if gif:
-        searcher = service.cse().list(q=query, searchType="image", cx=IMG_CX, safe="off", fileType="gif")
+        try:
+            # searcher = service.cse().list(q=query, searchType="image", cx=IMG_CX, safe="off", fileType="gif")
+            parameters = {
+                q: query,
+                searchType: "image",
+                cx: IMG_CX,
+                safe: "off",
+                fileType: "gif",
+                hq: "animated",
+                tbs: "itp:animated"
+            }
+            req = requests.get("https://www.googleapis.com/customsearch/v1",params=parameters)
+            # url = req.json()["items"][0]["link"]
+            return req.json()["items"]
+        except Exception as e:
+            CENA.set_text(str(e))
+            CENA.send_message()
     else:
         searcher = service.cse().list(q=query, searchType="image", cx=IMG_CX, safe="off")
-    res = searcher.execute()
-    return res["items"]
+        res = searcher.execute()
+        return res["items"]
 
 
 def search_gif(query, sender):
