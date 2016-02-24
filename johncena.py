@@ -156,10 +156,10 @@ def get_google_images_items(query, gif=False):
                 "searchType": "image",
                 "q": query,
                 "key": IMG_KEY,
-                "cx": IMG_CX
+                "cx": IMG_CX,
                 #"safe": "off",
                 "fileType": "gif",
-                "hq": "animated",
+                "hq": "animated"
             }
             req = requests.get("https://www.googleapis.com/customsearch/v1",params=parameters)
             return req.json()["items"]
