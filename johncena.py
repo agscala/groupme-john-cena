@@ -154,6 +154,7 @@ def get_google_images_items(query, gif=False):
             parameters = {
                 "q": query,
                 "searchType": "image",
+                "key": IMG_KEY,
                 "cx": IMG_CX,
                 "safe": "off",
                 "fileType": "gif",
