@@ -158,8 +158,8 @@ def get_google_images_items(query, gif=False):
                 "key": IMG_KEY,
                 "cx": IMG_CX
                 #"safe": "off",
-                #"fileType": "gif",
-                #"hq": "animated",
+                "fileType": "gif",
+                "hq": "animated",
             }
             req = requests.get("https://www.googleapis.com/customsearch/v1",params=parameters)
             CENA.set_text(req.url)
