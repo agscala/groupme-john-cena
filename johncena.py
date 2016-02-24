@@ -162,7 +162,7 @@ def get_google_images_items(query, gif=False):
             }
             req = requests.get("https://www.googleapis.com/customsearch/v1",params=parameters)
             # url = req.json()["items"][0]["link"]
-            CENA.set_text(req.json())
+            CENA.set_text(req.text)
             CENA.send_message()
             return req.json()["items"]
         except Exception as e:
