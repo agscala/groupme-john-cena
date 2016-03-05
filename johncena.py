@@ -308,7 +308,9 @@ def search_wiki(query, sender):
     """Search wikipedia for subject page"""
     try:
         page = wikipedia.page(query)
-        CENA.set_text(page.summary.split("\n")[0][:900])
+        text = page.summary.split("\n")[0][:900]
+        text += "\n{0}".format(page.url)
+        CENA.set_text(text)
     except Exception:
         other_pages = "\n".join(wikipedia.search(query)[:5])
         CENA.set_text("Couldn't find a match on wikipedia. Could it be one of these?\n{}".format(other_pages))
