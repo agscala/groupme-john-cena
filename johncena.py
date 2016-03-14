@@ -352,8 +352,11 @@ def search_weather(query, sender):
 		temp = r.json()['main']['temp']
 		condition = r.json()['weather'][0]["main"]
 		CENA.set_text('City:', city, '\nTemp:', temp, '\nCondition:', condition)
-	except Exception:
-		CENA.set_text("NO NO NO, INVALID LOCATION")
+	except Exception as e:
+            CENA.set_text("FUCK YOU!")
+            CENA.send_message()
+            CENA.set_text(str(e))
+            CENA.send_message()
 
 def show_help(query, sender):
     fns = sorted(SEARCHES.keys())
