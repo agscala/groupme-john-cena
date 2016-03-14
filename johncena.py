@@ -48,6 +48,7 @@ WOLF_KEY = "XP4YEL-GK2LW8JTV7"
 # youtube ---------------------------------------------------------------------
 YT_KEY = "AIzaSyBIbGpoq6PBDRjdIbTojjEiztZerVooOjg"
 YT_REQ = "https://www.googleapis.com/youtube/v3/search?part=snippet&q={}&key={}"
+#weather ----------------------------------------------------------------------
 
 JOHN_CENA_ACTIVATE = "http://media3.giphy.com/media/xTiTnoHt2NwerFMsCI/200.gif"
 JOHN_CENA_SAD = "http://static.giantbomb.com/uploads/screen_kubrick/9/93998/2651842-untitled.jpg"
@@ -342,6 +343,16 @@ def shaq(query, sender):
     except Exception:
         CENA.set_text("Couldn't find an image")
 
+def search_weather(query, sender):
+	try:
+		url = 'http://api.openweathermap.org/data/2.5/weather?zip=' + postal +','+ country_id + '&units=imperial' + '&appid=2269c80408e7aada9a3498b2f586f843'
+		r = requests.get(url)
+		city = r.json()['name']
+		temp = r.json()['main']['temp']
+		condition = r.json()['weather'][0]["main"]
+		CENA.set_text('City:', city, '\nTemp:', temp, '\nCondition:', condition)
+	except Exception:
+		CENA.set_text("NO NO NO, INVALID LOCATION")
 
 def show_help(query, sender):
     fns = sorted(SEARCHES.keys())
@@ -374,6 +385,7 @@ def bot(params=None):
       /query    Search Wolfram Alpha and return summary
       /wiki     Search for wiki page & return summary
       /yt       Search for youtube video & return link
+	  /weather	Search for current weather & returns city, temp, and condition
       /redeploy Redeploy John Cena
     """
 #    ticker_res = re.search('\$([A-Z]{1,4})', params['text'])
@@ -454,6 +466,10 @@ SEARCHES = {
         "fn": search_yt,
         "help": "Search for youtube video & return link",
     },
+	"/weather":{
+		"fn": search_weather,
+		"help": "search current weather conditions (enter zip code)"
+	},
     "/redeploy": {
         "fn": redeploy,
         "help": "Redeploy John Cena (dev purposes only)",
