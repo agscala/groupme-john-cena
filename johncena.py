@@ -346,7 +346,7 @@ def shaq(query, sender):
 def search_weather(query, sender):
 	try:
 		
-		url = 'http://api.openweathermap.org/data/2.5/weather?zip=' + query +','+ '&units=imperial' + '&appid=2269c80408e7aada9a3498b2f586f843'
+		url = 'http://api.openweathermap.org/data/2.5/weather?zip=' + query + '&units=imperial' + '&appid=2269c80408e7aada9a3498b2f586f843'
 		r = requests.get(url)
 		city = r.json()['name']
 		temp = r.json()['main']['temp']
