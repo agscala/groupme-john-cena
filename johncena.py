@@ -351,7 +351,7 @@ def search_weather(query, sender):
 		city = r.json()['name']
 		temp = r.json()['main']['temp']
 		condition = r.json()['weather'][0]["main"]
-		CENA.set_text('City:', city, '\nTemp:', temp, '\nCondition:', condition)
+		CENA.set_text("City: {}\nTemp: {}\nConditions: {}".format(city, temp, condition))
 	except Exception as e:
             CENA.set_text("FUCK YOU!")
             CENA.send_message()
