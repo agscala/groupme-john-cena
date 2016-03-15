@@ -401,6 +401,9 @@ def get_weather_search(query):
                 elif k == "zip":
                     search = v["url"].format(res.groups()[0])
                 break
+    except Exception as e:
+        CENA.set_text("Error creating weather query: {0}".format(str(e)))
+        CENA.send_message()
     return search
 
 
