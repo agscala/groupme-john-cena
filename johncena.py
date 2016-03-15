@@ -49,6 +49,7 @@ WOLF_KEY = "XP4YEL-GK2LW8JTV7"
 YT_KEY = "AIzaSyBIbGpoq6PBDRjdIbTojjEiztZerVooOjg"
 YT_REQ = "https://www.googleapis.com/youtube/v3/search?part=snippet&q={}&key={}"
 #weather ----------------------------------------------------------------------
+WEATHER_URL = "http://api.openweathermap.org/data/2.5/weather?{0}&units=imperial&appid=2269c80408e7aada9a3498b2f586f843"
 
 JOHN_CENA_ACTIVATE = "http://media3.giphy.com/media/xTiTnoHt2NwerFMsCI/200.gif"
 JOHN_CENA_SAD = "http://static.giantbomb.com/uploads/screen_kubrick/9/93998/2651842-untitled.jpg"
@@ -343,20 +344,81 @@ def shaq(query, sender):
     except Exception:
         CENA.set_text("Couldn't find an image")
 
+
+def get_weather_search(query):
+    searches = {
+        "city": {
+            "re": re.compile(r"(^[a-zA-Z]+)(,\s*[a-zA-Z]+)*"),
+            "url": "q={0}",
+        },
+        "coordinates": {
+            "re": re.compile(r"^\s*([+-]?[0-9]{1,3}(?:\.?[0-9]+)?[NSns]?),?\s*([+-]?[0-9]{1,3}(?:\.?[0-9]+)?[WEwe]?)\s*$"),
+            "url": "lat={0}&lon={1}",
+        },
+        "zip": {
+            "re": re.compile("^\s*([0-9]{5})\s*"),
+            "url": "zip={0}",
+        },
+    }
+    search = "q=Detroit,MI"
+    try:
+        for k, v in searches.items():
+            res = v["re"].match(query)
+            if res:
+                if k == "city":
+                    search = v["url"].format(res.group().replace(" ", ""))
+                elif k == "coordinates":
+                    lat, lon = res.groups()
+                    # Work with lower-case, and no need for + sign
+                    lat = lat.lower().replace("+", "")
+                    lon = lon.lower().replace("+", "")
+                    # Checking NSEW in the coordinates to make them positive
+                    # or negative based
+                    if "n" in lat:
+                        lat = lat.replace("n", "")  # remove the N
+                        lat = abs(float(lat))  # North is positive
+                    elif "s" in lat:
+                        lat = lat.replace("s", "")  # Remove the S
+                        if not lat.startswith("-"):  # Check if we start with negative, and add if necessary
+                            lat = "-{0}".format(lat)
+
+                    if "w" in lon:
+                        lon = lon.replace("w", "")  # Remove the W
+                        if not lon.startswith("-"):  # Check if we start with negative, and add if necessary
+                            lon = "-{0}".format(lon)
+                    elif "e" in lon:
+                        lon = lon.replace("e", "")  # Remove the E
+                        lon = abs(float(lon))  # East is positive
+
+                    # Check that both longitude & latitude are within valid
+                    # ranges. +/-90 for latitude, +-180 for longitude
+                    if ((-90.0 <= float(lat) <= 90.0) and
+                       (-180.0 <= float(lon) <= 180.0)):
+                        pass
+                    else:
+                        raise Exception("Invalid coordinates!")
+                    search = v["url"].format(lat, lon)
+                elif k == "zip":
+                    search = v["url"].format(res.groups()[0])
+                break
+    return search
+
+
 def search_weather(query, sender):
-	try:
-		
-		url = 'http://api.openweathermap.org/data/2.5/weather?zip=' + query + '&units=imperial' + '&appid=2269c80408e7aada9a3498b2f586f843'
-		r = requests.get(url)
-		city = r.json()['name']
-		temp = r.json()['main']['temp']
-		condition = r.json()['weather'][0]["main"]
-		CENA.set_text("City: {}\nTemp: {}\nConditions: {}".format(city, temp, condition))
-	except Exception as e:
-            CENA.set_text("FUCK YOU!")
-            CENA.send_message()
-            CENA.set_text(str(e))
-            CENA.send_message()
+    try:
+        search = get_weather_search(query)
+        url = WEATHER_URL.format(search)
+        r = requests.get(url)
+        city = r.json()['name']
+        temp = r.json()['main']['temp']
+        condition = r.json()['weather'][0]["main"]
+        CENA.set_text("City: {}\nTemp: {}\nConditions: {}".format(city, temp, condition))
+    except Exception as e:
+        CENA.set_text("FUCK YOU!")
+        CENA.send_message()
+        CENA.set_text(str(e))
+        CENA.send_message()
+
 
 def show_help(query, sender):
     fns = sorted(SEARCHES.keys())
@@ -389,7 +451,7 @@ def bot(params=None):
       /query    Search Wolfram Alpha and return summary
       /wiki     Search for wiki page & return summary
       /yt       Search for youtube video & return link
-	  /weather	Search for current weather & returns city, temp, and condition
+      /weather	Search for current weather & returns city, temp, and condition
       /redeploy Redeploy John Cena
     """
 #    ticker_res = re.search('\$([A-Z]{1,4})', params['text'])
@@ -470,10 +532,10 @@ SEARCHES = {
         "fn": search_yt,
         "help": "Search for youtube video & return link",
     },
-	"/weather":{
-		"fn": search_weather,
-		"help": "search current weather conditions (enter zip code)"
-	},
+    "/weather": {
+        "fn": search_weather,
+        "help": "Search current weather conditions. Possible searches are by: city/state, zip code, and lat/long coordinates"
+    },
     "/redeploy": {
         "fn": redeploy,
         "help": "Redeploy John Cena (dev purposes only)",
