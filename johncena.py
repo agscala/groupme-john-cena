@@ -483,7 +483,7 @@ def bot(params=None):
     except Exception as e:
         CENA.set_text("WTF: {}".format(str(e)))
 
-    if "john cena" in params["text"]:
+    if "john cena" in params["text"].lower():
         CENA.set_text(JOHN_CENA_ACTIVATE)
 
     CENA.send_message()
