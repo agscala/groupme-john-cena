@@ -432,7 +432,7 @@ def search_forecast(query, sender):
         js = r.json()
         text = "City: {}\n".format(js["city"]["name"])
         for day in js["list"]:
-            dt = time.strftime("%Y-%m-%d", time.localtime(day["dt"]))
+            dt = time.strftime("%a %Y-%m-%d", time.localtime(day["dt"]))
             text += "\nDay: {}".format(dt)
             text += "\nHigh: {}".format(day["temp"]["max"])
             text += "\nLow: {}".format(day["temp"]["min"])
