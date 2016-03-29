@@ -50,6 +50,7 @@ YT_KEY = "AIzaSyBIbGpoq6PBDRjdIbTojjEiztZerVooOjg"
 YT_REQ = "https://www.googleapis.com/youtube/v3/search?part=snippet&q={}&key={}"
 #weather ----------------------------------------------------------------------
 WEATHER_URL = "http://api.openweathermap.org/data/2.5/weather?{0}&units=imperial&appid=2269c80408e7aada9a3498b2f586f843"
+FORECAST_URL = "http://api.openweathermap.org/data/2.5/forecast/daily?{0}&cnt=5&units=imperial&appid=2269c80408e7aada9a3498b2f586f843"
 
 JOHN_CENA_ACTIVATE = "http://media3.giphy.com/media/xTiTnoHt2NwerFMsCI/200.gif"
 JOHN_CENA_SAD = "http://static.giantbomb.com/uploads/screen_kubrick/9/93998/2651842-untitled.jpg"
@@ -423,6 +424,27 @@ def search_weather(query, sender):
         CENA.send_message()
 
 
+def search_forecast(query, sender):
+    try:
+        search = get_weather_search(query)
+        url = FORECAST_URL.format(search)
+        r = requests.get(url)
+        js = r.json()
+        text = "City: {}\n".format(js["city"]["name"])
+        for day in js["list"]:
+            dt = time.strftime("%Y-%m-%d", time.localtime(day["dt"]))
+            text += "\nDay: {}".format(dt)
+            text += "\nHigh: {}".format(day["temp"]["max"])
+            text += "\nLow: {}".format(day["temp"]["min"])
+            text += "\nConditions: {}\n".format(day["weather"][0]["description"])
+        CENA.set_text(text.strip())
+    except Exception as e:
+        CENA.set_text("FUCK YOU!")
+        CENA.send_message()
+        CENA.set_text(str(e))
+        CENA.send_message()
+
+
 def show_help(query, sender):
     fns = sorted(SEARCHES.keys())
     l = max(map(len, fns)) + 4
@@ -433,6 +455,8 @@ def show_help(query, sender):
 
 def redeploy(query, sender):
     subprocess.call("git pull origin master && supervisorctl restart johncena", shell=True)
+    CENA.set_text(JOHN_CENA_ACTIVATE)
+    CENA.send_message()
 
 
 # =============================================================================
@@ -498,6 +522,10 @@ SEARCHES = {
     "/help": {
         "fn": show_help,
         "help": "Show this help message",
+    },
+    "/forecast": {
+        "fn": search_forecast,
+        "help": "Get a 5-day forecast for a specified city",
     },
     "/gif": {
         "fn": search_gif,
