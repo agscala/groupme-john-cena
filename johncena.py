@@ -190,7 +190,10 @@ def search_gif(query, sender):
         items = get_google_images_items(query, True)
         url = items[0]["link"]
         CENA.set_text(url)
-    except Exception:
+    except Exception as e:
+        CENA.set_text("ERROR: {}".format(str(e)))
+        CENA.send_message()
+        time.sleep(0.05)
         CENA.set_text("Couldn't find a gif, here's a google image instead.")
         CENA.send_message()
         search_img(query, sender)
@@ -205,7 +208,10 @@ def search_randgif(query, sender):
         item = random.choice(items)
         url = item["link"]
         CENA.set_text(url)
-    except Exception:
+    except Exception as e:
+        CENA.set_text("ERROR: {}".format(str(e)))
+        CENA.send_message()
+        time.sleep(0.05)
         CENA.set_text("Couldn't find a gif, here's a google image instead.")
         CENA.send_message()
         search_img(query, sender)
@@ -217,7 +223,10 @@ def search_img(query, sender):
         items = get_google_images_items(query, False)
         url = items[0]["link"]
         CENA.set_text(url)
-    except Exception:
+    except Exception as e:
+        CENA.set_text("ERROR: {}".format(str(e)))
+        CENA.send_message()
+        time.sleep(0.05)
         CENA.set_text("Couldn't find an image")
 
 
