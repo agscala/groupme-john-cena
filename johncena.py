@@ -149,6 +149,10 @@ def untappd(search):
 # =============================================================================
 # Search Functions
 # =============================================================================
+def print_subreddit(query, sender):
+    CENA.set_text("https://reddit.com/r/{}".format(query))
+
+
 def get_google_images_items(query, gif=False):
     service = build("customsearch", "v1", developerKey=IMG_KEY)
     if gif:
@@ -559,6 +563,10 @@ SEARCHES = {
     "/query": {
         "fn": search_wolfram,
         "help": "Search Wolfram Alpha and return summary",
+    },
+    "/r": {
+        "fn": print_subreddit,
+        "help": "prints link to subreddits",
     },
     "/randgif": {
         "fn": search_randgif,
