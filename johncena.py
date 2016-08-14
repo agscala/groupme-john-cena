@@ -129,7 +129,7 @@ class GroupmeMessage(object):
 # =============================================================================
 def search_boardgamegeek(query, sender):
     try:
-        bgg = boardgamegeek.BoardGameGeek()
+        bgg = boardgamegeek.BoardGameGeek(disable_ssl=True)
         games = bgg.search(query)
         game = bgg.game(games[0].name)
 
@@ -151,7 +151,7 @@ def search_boardgamegeek(query, sender):
             "max_players": game.max_players,
             "mechanics": ", ".join(game.mechanics),
             "description": game.description[:500],
-            "url": "https://boardgamegeek.com/boardgame/" + game.id
+            "url": "https://boardgamegeek.com/boardgame/" + str(game.id)
         })
 
         CENA.set_text(response)

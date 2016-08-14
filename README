@@ -2,3 +2,6 @@
 2) python johncena.py
 3) ???
 4) PROFIT
+
+Run tests:
+python tests.py
