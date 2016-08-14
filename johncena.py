@@ -444,9 +444,12 @@ def search_forecast(query, sender):
 def show_help(query, sender):
     fns = sorted(SEARCHES.keys())
     l = max(map(len, fns)) + 4
-    fnhelp = "\n".join(["  {:<{}}{}".format(f, l, SEARCHES[f]["help"])
-                        for f in fns])
-    CENA.set_text(__doc__.format(fnhelp))
+    fnhelp1 = "\n".join(["  {:<{}}{}".format(f, l, SEARCHES[f]["help"]) for f in fns[:12])
+    fnhelp2 = "\n".join(["  {:<{}}{}".format(f, l, SEARCHES[f]["help"]) for f in fns[12:])
+    CENA.set_text(__doc__.format(fnhelp1))
+    CENA.send_message()
+    CENA.set_text(__doc__.format(fnhelp2))
+    CENA.send_message()
 
 
 def redeploy(query, sender):
