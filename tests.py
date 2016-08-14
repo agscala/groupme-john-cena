@@ -27,8 +27,9 @@ class TestJohnCena(unittest.TestCase):
         self.assertTrue(CENA.text in outcomes)
 
     def test_boardgamegeek(self):
-        search_boardgamegeek("netrunner", None)
+        search_boardgamegeek("dominion", None)
         print CENA.text
+
         self.assertTrue(True)
 
 

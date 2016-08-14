@@ -131,15 +131,20 @@ def search_boardgamegeek(query, sender):
     try:
         bgg = boardgamegeek.BoardGameGeek(disable_ssl=True)
         games = bgg.search(query)
-        game = bgg.game(games[0].name)
+        full_games = [bgg.game(game.name) for game in games[:5]]
+        game = full_games[0]
+        for g in full_games:
+            if g.users_rated > game.users_rated:
+                game = g
+
 
         response = """{title} ({year})\n
-        Average Rating: {average_rating} (rated by {num_ratings} players)
-        Players: {min_players}-{max_players}
-        Playing Time: {playing_time} minutes
-        Mechanics: {mechanics}
-        URL: {url}
-        Description: {description}...
+Average Rating: {average_rating} (rated by {num_ratings} players)
+Players: {min_players}-{max_players}
+Playing Time: {playing_time} minutes
+Mechanics: {mechanics}
+URL: {url}
+Description: {description}...
         """.format(**{
             "title": game.name,
             "year": game.year,
@@ -150,13 +155,14 @@ def search_boardgamegeek(query, sender):
             "min_players": game.min_players,
             "max_players": game.max_players,
             "mechanics": ", ".join(game.mechanics),
-            "description": game.description[:500],
+            "description": game.description.split("\n")[0],
             "url": "https://boardgamegeek.com/boardgame/" + str(game.id)
         })
 
         CENA.set_text(response)
 
-    except Exception:
+    except Exception as e:
+        raise e
         CENA.set_text("No results found on BoardGameGeek")
 
 
