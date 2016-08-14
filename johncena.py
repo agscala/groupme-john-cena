@@ -137,7 +137,6 @@ def search_boardgamegeek(query, sender):
             if g.users_rated > game.users_rated:
                 game = g
 
-
         response = """{title} ({year})\n
 Average Rating: {average_rating} (rated by {num_ratings} players)
 Players: {min_players}-{max_players}
@@ -155,7 +154,6 @@ Description: {description}...
             "min_players": game.min_players,
             "max_players": game.max_players,
             "mechanics": ", ".join(game.mechanics),
-            "description": game.description.split("\n")[0],
             "url": "https://boardgamegeek.com/boardgame/" + str(game.id)
         })
 
