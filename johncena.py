@@ -42,7 +42,6 @@ IMG_CX = "006198087467552022390:yzva27gjh_u"
 MAPS_URL = "https://maps.googleapis.com/maps/api/place/textsearch/json"
 MAPS_KEY = "AIzaSyDQF9Ukvb2nIL66SCoq76Ru4tXZoTL5rY8"
 # python ----------------------------------------------------------------------
-# untappd ---------------------------------------------------------------------
 # wolfram ---------------------------------------------------------------------
 WOLF_KEY = "XP4YEL-GK2LW8JTV7"
 # wiki ------------------------------------------------------------------------
@@ -123,28 +122,6 @@ class GroupmeMessage(object):
             print(data)
             requests.post(GROUPME_API_URL, data=data)
         self.clear_all()  # Don't send the same message twice
-
-
-def untappd(search):
-    """Untappd search?"""
-    result = ""
-
-    search = search.replace(" ", "+")
-    r = requests.get("https://api.untappd.com/v4/search/brewery?client_id=020F333A20425A0BAE9C65FAA784B3ED8AD641C1&client_secret=0BFFA478D5CEE84D2D263F58FBD9B5876F9B2F59&q="+search+"&limit=1")
-    brewery_id = r.json()["response"]["brewery"]["items"][0]["brewery"]["brewery_id"]
-    brewery_name = r.json()["response"]["brewery"]["items"][0]["brewery"]["brewery_name"]
-    result = result + ">>> " + brewery_name + "\n\n"
-
-    r = requests.get("https://api.untappd.com/v4/brewery/info/"+str(brewery_id)+"?client_id=020F333A20425A0BAE9C65FAA784B3ED8AD641C1&client_secret=0BFFA478D5CEE84D2D263F58FBD9B5876F9B2F59")
-    beers = r.json()["response"]["brewery"]["beer_list"]["items"]
-
-    for beer in beers:
-        beer = beer["beer"]
-        if beer["is_in_production"] == 1:
-            description = beer["beer_name"] + " (" + beer["beer_style"] + ", " + str(beer["beer_abv"]) + "% ABV)\n"
-            result = result + description
-
-    return result
 
 
 # =============================================================================
@@ -314,19 +291,6 @@ def search_maps(query, sender):
     keys = ["name", "formatted_address"]
     url = ("{}?query={}&key={}").format(MAPS_URL, query, MAPS_KEY)
     maps_search(query, url, keys, 5, False, False)
-
-
-def python_eval(query, sender):
-    """Call a local python command/function and return stdout"""
-    cmd = "python -c \"{}\"".format(query)
-    time.sleep(0.05)
-    try:
-        proc = subprocess.Popen(cmd, stdin=None, stdout=subprocess.PIPE,
-                                shell=True)
-        stdout = proc.communicate()[0]
-        CENA.set_text(">>> {}".format(str(stdout)[:995]))
-    except Exception as e:
-        CENA.set_text("Error: {}".format(str(e)))
 
 
 def search_wolfram(query, sender):
@@ -576,10 +540,6 @@ SEARCHES = {
     "/map": {
         "fn": search_maps,
         "help": "Search Google maps for top 5 locations related to query",
-    },
-    "/py": {
-        "fn": python_eval,
-        "help": "Perform python function / command & return stdout",
     },
     "/query": {
         "fn": search_wolfram,
