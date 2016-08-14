@@ -134,12 +134,12 @@ def search_boardgamegeek(query, sender):
         game = bgg.game(games[0].name)
 
         response = """{title} ({year})\n
-        Average Rating: {average_rating} (rated by {num_ratings} players)\n
-        Players: {min_players}-{max_players}\n
-        Playing Time: {playing_time} minutes\n
-        Mechanics: {mechanics}\n
-        URL: {url}\n
-        Description: {description}...\n
+        Average Rating: {average_rating} (rated by {num_ratings} players)
+        Players: {min_players}-{max_players}
+        Playing Time: {playing_time} minutes
+        Mechanics: {mechanics}
+        URL: {url}
+        Description: {description}...
         """.format(**{
             "title": game.name,
             "year": game.year,
