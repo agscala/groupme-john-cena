@@ -590,7 +590,6 @@ CENA = GroupmeMessage()
 # Entry Code
 # =============================================================================
 if __name__ == "__main__":
-    time.sleep(1)
     run(host='0.0.0.0', port=80)
 
 app = default_app()
