@@ -25,6 +25,7 @@ import wikipedia
 import datetime
 import wolframalpha
 import subprocess
+import dice
 from googleapiclient.discovery import build
 
 
@@ -149,6 +150,24 @@ def untappd(search):
 # =============================================================================
 # Search Functions
 # =============================================================================
+def coinflip(query, sender):
+    try:
+        result = random.randint(0, 1)
+        if result is 0:
+            CENA.set_text("https://upload.wikimedia.org/wikipedia/en/thumb/6/6c/Toonie_-_back.png/220px-Toonie_-_back.png")
+        else:
+            CENA.set_text("https://upload.wikimedia.org/wikipedia/en/d/d2/Toonie_-_front.png")
+    except Exception:
+        CENA.set_text("They rolled off the table...")
+
+def roll_dice(query, sender):
+    try:
+        result = dice.roll(query)
+        CENA.set_text(str(result))
+    except Exception:
+        CENA.set_text("They rolled off the table...")
+
+
 def print_subreddit(query, sender):
     CENA.set_text("https://reddit.com/r/{}".format(query))
 
@@ -467,7 +486,9 @@ def show_help(query, sender):
 
 
 def redeploy(query, sender):
-    subprocess.call("git pull origin master && supervisorctl restart johncena", shell=True)
+    subprocess.call("git pull origin master", shell=True)
+    subprocess.call("pip install -r requirements.txt", shell=True)
+    subprocess.call("supervisorctl restart johncena", shell=True)
     CENA.set_text(JOHN_CENA_ACTIVATE)
     CENA.send_message()
 
@@ -568,6 +589,14 @@ SEARCHES = {
         "fn": print_subreddit,
         "help": "prints link to subreddits",
     },
+    "/roll": {
+        "fn": roll_dice,
+        "help": "DnD style dice roll. 2d6 shows individual rolls, 2d6t shows sum",
+    },
+    "/coinflip": {
+        "fn": coinflip,
+        "help": "Flip a coin",
+    },
     "/randgif": {
         "fn": search_randgif,
         "help": "Get a random google images gif",
@@ -601,8 +630,6 @@ CENA = GroupmeMessage()
 # Entry Code
 # =============================================================================
 if __name__ == "__main__":
-    CENA.set_text("AND HIS NAME IS")
-    CENA.send_message()
     time.sleep(1)
     run(host='0.0.0.0', port=80)
 
