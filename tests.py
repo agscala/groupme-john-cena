@@ -1,6 +1,6 @@
 import unittest
 
-from johncena import CENA, print_subreddit, roll_dice, coinflip
+from johncena import CENA, print_subreddit, roll_dice, coinflip, search_boardgamegeek
 
 class TestJohnCena(unittest.TestCase):
     def test_wikipedia(self):
@@ -25,6 +25,12 @@ class TestJohnCena(unittest.TestCase):
             "https://upload.wikimedia.org/wikipedia/en/thumb/6/6c/Toonie_-_back.png/220px-Toonie_-_back.png"
         ]
         self.assertTrue(CENA.text in outcomes)
+
+    def test_boardgamegeek(self):
+        search_boardgamegeek("netrunner", None)
+        print CENA.text, "sdfdafdfadfadf"
+        self.assertTrue(True)
+
 
 
 

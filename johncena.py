@@ -25,6 +25,7 @@ import datetime
 import wolframalpha
 import subprocess
 import dice
+import boardgamegeek
 from googleapiclient.discovery import build
 
 
@@ -126,6 +127,42 @@ class GroupmeMessage(object):
 # =============================================================================
 # Search Functions
 # =============================================================================
+def search_boardgamegeek(query, sender):
+    try:
+        bgg = boardgamegeek.BoardGameGeek()
+        games = bgg.search(query)
+        game = bgg.game(games[0].name)
+
+        CENA.set_text(game.image)
+        CENA.send_response()
+
+        response = """{title} ({year})\n
+        Average Rating: {average_rating} (rated by {num_ratings} players)\n
+        Players: {min_players}-{max_players}\n
+        Playing Time: {playing_time} minutes\n
+        Mechanics: {mechanics}\n
+        URL: {url}\n
+        Description: {description}...\n
+        """.format(**{
+            "title": game.name,
+            "year": game.year,
+            "average_rating": game.rating_average,
+            "average_weight": game.rating_average_weight,
+            "num_ratings": game.users_rated,
+            "playing_time": game.playing_time,
+            "min_players": game.min_players,
+            "max_players": game.max_players,
+            "mechanics": ", ".join(game.mechanics),
+            "description": game.description[:500],
+            "url": "https://boardgamegeek.com/boardgame/" + game.id
+        })
+
+        CENA.set_text(response)
+
+    except Exception:
+        CENA.set_text("No results found on BoardGameGeek")
+
+
 def coinflip(query, sender):
     try:
         result = random.randint(0, 1)
