@@ -604,6 +604,10 @@ SEARCHES = {
         "fn": shaq,
         "help": "Get a Shaq goldbond quote",
     },
+    "/bgg": {
+        "fn": search_boardgamegeek,
+        "help": "Search BoardGameGeek",
+    },
     "/wiki": {
         "fn": search_wiki,
         "help": "Search for wiki page & return summary",
