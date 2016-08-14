@@ -604,8 +604,6 @@ if __name__ == "__main__":
     CENA.set_text("AND HIS NAME IS")
     CENA.send_message()
     time.sleep(1)
-    CENA.set_text(JOHN_CENA_ACTIVATE)
-    CENA.send_message()
     run(host='0.0.0.0', port=80)
 
 app = default_app()
