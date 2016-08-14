@@ -28,7 +28,7 @@ class TestJohnCena(unittest.TestCase):
 
     def test_boardgamegeek(self):
         search_boardgamegeek("netrunner", None)
-        print CENA.text, "sdfdafdfadfadf"
+        print CENA.text
         self.assertTrue(True)
 
 

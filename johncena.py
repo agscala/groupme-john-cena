@@ -133,9 +133,6 @@ def search_boardgamegeek(query, sender):
         games = bgg.search(query)
         game = bgg.game(games[0].name)
 
-        CENA.set_text(game.image)
-        CENA.send_response()
-
         response = """{title} ({year})\n
         Average Rating: {average_rating} (rated by {num_ratings} players)\n
         Players: {min_players}-{max_players}\n
