@@ -216,6 +216,8 @@ def get_google_images_items(query, gif=False):
 
 def search_gif(query, sender):
     """Search Giphy and return link for search"""
+    CENA.set_text("This shit is disabled right now. Quit using it fucker.")
+    return
     try:
         rl.mark_sending(sender)
         time.sleep(0.05)
@@ -238,6 +240,8 @@ def search_gif(query, sender):
 
 def search_randgif(query, sender):
     """Search google images and return link for search"""
+    CENA.set_text("This shit is disabled right now. Quit using it fucker.")
+    return
     try:
         rl.mark_sending(sender)
         time.sleep(0.05)
@@ -256,6 +260,8 @@ def search_randgif(query, sender):
 
 def search_img(query, sender):
     """Search for Google images and return"""
+    CENA.set_text("This shit is disabled right now. Quit using it fucker.")
+    return
     try:
         items = get_google_images_items(query, False)
         url = items[0]["link"]
