@@ -26,6 +26,7 @@ import wolframalpha
 import subprocess
 import dice
 import boardgamegeek
+import settings
 from googleapiclient.discovery import build
 
 
@@ -33,31 +34,31 @@ from googleapiclient.discovery import build
 # Global variables & constants
 # =============================================================================
 # gif -------------------------------------------------------------------------
-GIF_KEY = "dc6zaTOxFJmzC"
-GIF_SEARCH = "http://api.giphy.com/v1/gifs/search?q={}&api_key={}"
+GIF_KEY = settings.GIF_KEY
+GIF_SEARCH = settings.GIF_SEARCH
 # image -----------------------------------------------------------------------
-IMG_KEY = "AIzaSyDQF9Ukvb2nIL66SCoq76Ru4tXZoTL5rY8"
-IMG_CX = "006198087467552022390:yzva27gjh_u"
+IMG_KEY = settings.IMG_KEY 
+IMG_CX = settings.IMG_CX 
 # maps ------------------------------------------------------------------------
-MAPS_URL = "https://maps.googleapis.com/maps/api/place/textsearch/json"
-MAPS_KEY = "AIzaSyDQF9Ukvb2nIL66SCoq76Ru4tXZoTL5rY8"
+MAPS_URL = settings.MAPS_URL 
+MAPS_KEY = settings.MAPS_KEY 
 # python ----------------------------------------------------------------------
 # wolfram ---------------------------------------------------------------------
-WOLF_KEY = "XP4YEL-GK2LW8JTV7"
+WOLF_KEY = settings.WOLF_KEY 
 # wiki ------------------------------------------------------------------------
 # youtube ---------------------------------------------------------------------
-YT_KEY = "AIzaSyBIbGpoq6PBDRjdIbTojjEiztZerVooOjg"
-YT_REQ = "https://www.googleapis.com/youtube/v3/search?part=snippet&q={}&key={}"
+YT_KEY = settings.YT_KEY 
+YT_REQ = settings.YT_REQ 
 #weather ----------------------------------------------------------------------
-WEATHER_URL = "http://api.openweathermap.org/data/2.5/weather?{0}&units=imperial&appid=2269c80408e7aada9a3498b2f586f843"
-FORECAST_URL = "http://api.openweathermap.org/data/2.5/forecast/daily?{0}&cnt=5&units=imperial&appid=2269c80408e7aada9a3498b2f586f843"
+WEATHER_URL = settings.WEATHER_URL 
+FORECAST_URL = settings.FORECAST_URL 
 
-JOHN_CENA_ACTIVATE = "http://media3.giphy.com/media/xTiTnoHt2NwerFMsCI/200.gif"
-JOHN_CENA_SAD = "http://static.giantbomb.com/uploads/screen_kubrick/9/93998/2651842-untitled.jpg"
-JOHN_CENA_WTF = "https://whatistheexcel.com/wooobooru/_images/91fa21f02ccbe8980eae483263197965/812%20-%20john_cena%20macro%20wtf_am_i_looking_at%20wwe.png"
+JOHN_CENA_ACTIVATE = settings.JOHN_CENA_ACTIVATE 
+JOHN_CENA_SAD = settings.JOHN_CENA_SAD 
+JOHN_CENA_WTF = settings.JOHN_CENA_WTF 
 
-GROUPME_API_URL = "https://api.groupme.com/v3/bots/post"
-BOT_ID = "63747737acc3dbf60d7df729fd"
+GROUPME_API_URL = settings.GROUPME_API_URL 
+BOT_ID = settings.BOT_ID 
 
 
 # =============================================================================
@@ -119,7 +120,6 @@ class GroupmeMessage(object):
             data["attachments"] = self.attachments
         if data:
             data["bot_id"] = self.bot_id
-            print(data)
             requests.post(GROUPME_API_URL, data=data)
         self.clear_all()  # Don't send the same message twice
 
@@ -187,7 +187,7 @@ def print_subreddit(query, sender):
 
 
 def get_google_images_items(query, gif=False):
-    service = build("customsearch", "v1", developerKey=IMG_KEY)
+    #service = build("customsearch", "v1", developerKey=IMG_KEY)
     if gif:
         try:
             # searcher = service.cse().list(q=query, searchType="image", cx=IMG_CX, safe="off", fileType="gif")
@@ -204,11 +204,10 @@ def get_google_images_items(query, gif=False):
             req = requests.get("https://www.googleapis.com/customsearch/v1",params=parameters)
             return req.json()["items"]
         except Exception as e:
-            CENA.set_text("aaron your code fucking sucks")
-            CENA.send_message()
-            CENA.set_text(str(e))
+            CENA.set_text("aaron your code fucking sucks: {}".format(str(e)))
             CENA.send_message()
     else:
+        service = build("customsearch", "v1", developerKey=IMG_KEY)
         searcher = service.cse().list(q=query, searchType="image", cx=IMG_CX, safe="off")
         res = searcher.execute()
         return res["items"]
@@ -216,8 +215,6 @@ def get_google_images_items(query, gif=False):
 
 def search_gif(query, sender):
     """Search Giphy and return link for search"""
-    CENA.set_text("This shit is disabled right now. Quit using it fucker.")
-    return
     try:
         rl.mark_sending(sender)
         time.sleep(0.05)
@@ -240,8 +237,6 @@ def search_gif(query, sender):
 
 def search_randgif(query, sender):
     """Search google images and return link for search"""
-    CENA.set_text("This shit is disabled right now. Quit using it fucker.")
-    return
     try:
         rl.mark_sending(sender)
         time.sleep(0.05)
@@ -260,8 +255,6 @@ def search_randgif(query, sender):
 
 def search_img(query, sender):
     """Search for Google images and return"""
-    CENA.set_text("This shit is disabled right now. Quit using it fucker.")
-    return
     try:
         items = get_google_images_items(query, False)
         url = items[0]["link"]
