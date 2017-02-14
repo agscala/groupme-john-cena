@@ -167,9 +167,7 @@ def search_urbandictionary(query, sender):
     try:
         results = urbandictionary.define(query)
         response = u"""{word} ({upvotes} up, {downvotes} down)\n
-	\n
-	{definition}
-	\n
+	{definition}\n
 	"{example}"
         """.format(**{
             "word": results[0].word,
