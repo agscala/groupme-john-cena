@@ -15,6 +15,7 @@ from requests.exceptions import ConnectionError
 from collections import defaultdict
 import urbandictionary
 import json
+import uuid
 import random
 import re
 import os
@@ -139,6 +140,8 @@ def notify_everyone():
     user_ids = []
     locations = []
     for member in members:
+	if member["nickname"] == "JOHN CENA":
+		continue
         locations.append([len(message), len(member["nickname"]) + 1])
         user_ids.append(member["user_id"])
 
