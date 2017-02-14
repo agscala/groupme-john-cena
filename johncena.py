@@ -172,11 +172,11 @@ def search_urbandictionary(query, sender):
 	\n
 	"{example}"
         """.format(**{
-            "word": response[0].word,
-            "upvotes": response[0].upvotes,
-            "downvotes": response[0].downvotes,
-            "definition": response[0].definition,
-	    "example": response[0].example,
+            "word": results[0].word,
+            "upvotes": results[0].upvotes,
+            "downvotes": results[0].downvotes,
+            "definition": results[0].definition,
+	    "example": results[0].example,
         })
         CENA.set_text(response)
 
