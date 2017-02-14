@@ -2,7 +2,7 @@
 
 """
 Supports:
-{}
+
 """
 
 # ============================================================================
@@ -127,6 +127,38 @@ class GroupmeMessage(object):
 # =============================================================================
 # Search Functions
 # =============================================================================
+
+def notify_everyone():
+    ACCESS_TOKEN = "wiTWIt8h63UkldDKjcL4knY3HG504H0dY3xW6r0N"
+
+    response = requests.get("https://api.groupme.com/v3/groups/3829399", params={"token": ACCESS_TOKEN})
+    members = response.json()["response"]["members"]
+    
+    message = ""
+    user_ids = []
+    locations = []
+    for member in members:
+        locations.append([len(message), len(member["nickname"]) + 1])
+        user_ids.append(member["user_id"])
+
+        message = message + "@" + member["nickname"] + " "
+
+    message = {"message": {
+                "source_guid": str(uuid.uuid4()),
+                "text": message,
+                "attachments": [{
+                    "type": "mentions",
+                    "user_ids": user_ids,
+                    "loci": locations
+                }],
+              }}
+
+    result = requests.post("https://api.groupme.com/v3/groups/3829399/messages",
+                            data=json.dumps(message),
+                            headers={"X-Access-Token": ACCESS_TOKEN,
+                                     "Content-Type": "application/json"})
+  
+
 def search_boardgamegeek(query, sender):
     try:
         bgg = boardgamegeek.BoardGameGeek(disable_ssl=True)
@@ -546,6 +578,9 @@ def bot(params=None):
 
     if "john cena" in params["text"].lower():
         CENA.set_text(JOHN_CENA_ACTIVATE)
+
+    if "@all" in params["text"].lower():
+	notify_everyone()
 
     CENA.send_message()
 
