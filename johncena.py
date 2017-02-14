@@ -540,17 +540,19 @@ def bot(params=None):
     """John Cena!
 
     Supports:
+      @all      Mention everyone in a message
       /help     Show this help message
       /gif      Search Giphy for gifs and return first link if found
       /img      Search Google images & return first link if found
       /lunch    Search Google maps for lunch spots!
       /map      Search Google maps for top 5 stuff
-      /py       Perform python function / command & return stdout
+      /r        Link to subreddit
       /query    Search Wolfram Alpha and return summary
       /wiki     Search for wiki page & return summary
       /yt       Search for youtube video & return link
       /weather	Search for current weather & returns city, temp, and condition
-      /redeploy Redeploy John Cena
+      /bgg      Search BoardGameGeek
+      /redeploy Redeploy John Cena (dev purposes only)
     """
 #    ticker_res = re.search('\$([A-Z]{1,4})', params['text'])
 #    if ticker_res:
