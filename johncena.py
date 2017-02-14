@@ -169,13 +169,12 @@ def search_boardgamegeek(query, sender):
             if g.users_rated > game.users_rated:
                 game = g
 
-        response = """{title} ({year})\n
+        response = u"""{title} ({year})\n
 Average Rating: {average_rating} (rated by {num_ratings} players)
 Players: {min_players}-{max_players}
 Playing Time: {playing_time} minutes
 Mechanics: {mechanics}
 URL: {url}
-Description: {description}...
         """.format(**{
             "title": game.name,
             "year": game.year,
