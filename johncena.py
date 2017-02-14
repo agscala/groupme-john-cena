@@ -13,6 +13,7 @@ from bottle import default_app, route, request, post, run
 from pprint import pprint
 from requests.exceptions import ConnectionError
 from collections import defaultdict
+import urbandictionary
 import json
 import uuid
 import random
@@ -161,6 +162,27 @@ def notify_everyone():
                             headers={"X-Access-Token": ACCESS_TOKEN,
                                      "Content-Type": "application/json"})
   
+
+def search_urbandictionary(query, sender):
+    try:
+        results = urbandictionary.define(query)
+        response = u"""{word} ({upvotes} up, {downvotes} down)\n
+	\n
+	{definition}
+	\n
+	"{example}"
+        """.format(**{
+            "word": response[0].word,
+            "upvotes": response[0].upvotes,
+            "downvotes": response[0].downvotes,
+            "definition": response[0].definition,
+	    "example": response[0].example,
+        })
+        CENA.set_text(response)
+
+    except Exception as e:
+        raise e
+        CENA.set_text("No results found on Urban Dictionary")
 
 def search_boardgamegeek(query, sender):
     try:
@@ -634,6 +656,10 @@ SEARCHES = {
     "/coinflip": {
         "fn": coinflip,
         "help": "Flip a coin",
+    },
+    "/define": {
+        "fn": search_urbandictionary,
+        "help": "Define a word on urban dictionary",
     },
     "/randgif": {
         "fn": search_randgif,

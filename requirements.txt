@@ -1,3 +1,4 @@
+argparse==1.2.1
 beautifulsoup4==4.4.1
 boardgamegeek==0.13.2
 bottle==0.12.8
@@ -14,7 +15,9 @@ requests-cache==0.4.12
 rsa==3.3
 simplejson==3.8.1
 six==1.10.0
+urbandictionary==1.1
 uritemplate==0.6
 wheel==0.26.0
 wikipedia==1.4.0
 wolframalpha==1.2
+wsgiref==0.1.2
